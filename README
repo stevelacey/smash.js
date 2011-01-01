@@ -1,0 +1,7 @@
+Smash.js simply scrapes Smashing Magazine by guessing the 301 URL to their latest monthly wallpaper article. It then grabs the URL's to the largest resolution 'without calendar' wallpapers, falling back to 'with calendar' if none are provided.
+
+These URL's are then fed to push-to-dropbox.rb, which maintains a directory structure of 'Wallpaper/Monthly/YYYY-MM' and 'Wallpaper/Monthly/Current'.
+
+On execution push-to-dropbox.rb renames the current 'Current' directory to the YYYY-MM of the last month, and creates a new 'Current' directory; which is then populated with the images referenced from smash.js.
+
+These scripts are designed to be ran on a monthly cron, I execute them in the early hours on the first of every month.
