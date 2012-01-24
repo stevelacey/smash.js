@@ -1,30 +1,68 @@
-var sys     = require('sys'),
-    request = require('request'),
-    fs      = require('fs'),
-    url     = require('url'),
-    $       = require('jquery'),
-    exec    = require('child_process').exec,
-    util    = require('util'),
-    date    = new Date(),
-    wallpaper = []
+#!/usr/local/bin/node
 
-Date.prototype.getMonthName = function() {
-  var m = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  return m[this.getMonth()];
+require('datejs')
+require('util')
+
+var request = require('request'),
+    fs = require('fs'),
+    url = require('url'),
+    http = require('http'),
+    $ = require('jquery'),
+
+    directory = 'wallpaper'
+    old = directory + '/' + Date.parse('-month').toString('yyyy-MM'),
+    path = directory + '/' + 'Current',
+
+    debug = true
+
+var uri = 'http://www.smashingmagazine.com/desktop-wallpaper-calendar-' + Date.today().toString('MMMM-yyyy')
+
+if (debug) {
+  console.log('Requesting ' + uri);
 }
 
-request({uri: 'http://www.smashingmagazine.com/desktop-wallpaper-calendar-' + date.getMonthName() + '-' + date.getFullYear()}, function (error, r, html) {
-  if(!error && r.statusCode == 200) {
-    $('.post .entry ul:contains("calendar")', html).each(function() {
-      wallpaper[wallpaper.length] = '"' + $('li:contains("without calendar") a:last, li:contains("with calendar") a:last', this).attr('href') + '"';
-    })
+request({uri: uri}, function (error, r, html) {
+  if (!error && r.statusCode == 200) {
+    if (debug) {
+      console.log('Moving ' + path + ' to ' + old)
+    }
 
-    exec('ruby push-to-dropbox.rb ' + wallpaper.join(' '), function (error, stdout, stderr) {
-      util.print('stdout: ' + stdout);
-      util.print('stderr: ' + stderr);
-      if (error !== null) {
-        console.log('exec error: ' + error);
+    fs.rename(path, old)
+
+    if (debug) {
+      console.log('Creating ' + path)
+    }
+
+    fs.mkdir(path)
+
+    if (debug) {
+      console.log('Scraping')
+    }
+
+    $('.post ul:contains("calendar")', html).each(function() {
+      var wallpaper = $('li:contains("without calendar") a:last, li:contains("with calendar") a:last', this).attr('href')
+
+      if (debug) {
+        console.log(wallpaper)
       }
-    });
+
+      var filename = url.parse(wallpaper).pathname.split('/').pop();
+      var file = fs.createWriteStream(path + '/' + filename);
+
+      var options = {
+        host: url.parse(wallpaper).host,
+        port: 80,
+        path: url.parse(wallpaper).pathname
+      }
+
+      http.get(options, function(res) {
+        res.on('data', function(data) {
+          file.write(data);
+        }).on('end', function() {
+          file.end();
+          console.log(filename + ' downloaded to ' + path);
+        })
+      })
+    })
   }
 })
