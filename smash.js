@@ -39,8 +39,14 @@ request({uri: uri}, function (error, r, html) {
       console.log('Scraping')
     }
 
-    $('.post ul:contains("calendar")', html).each(function() {
-      var wallpaper = $('li:contains("without calendar") a:last, li:contains("with calendar") a:last', this).attr('href')
+    $.extend($.expr[':'], {
+      'containsi': function(elem, i, match, array) {
+        return (elem.textContent || elem.innerText || '').toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
+      }
+    });
+
+    $('.post ul:containsi("calendar"):has(li:containsi("with"))', html).each(function() {
+      var wallpaper = $('li:containsi("without calendar") a:last, li:containsi("with calendar") a:last', this).attr('href')
 
       if (debug) {
         console.log(wallpaper)
