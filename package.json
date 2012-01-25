@@ -1,0 +1,24 @@
+{
+  "name": "smash",
+  "version": "0.1.2",
+  "author": "Steve Lacey <steve@stevelacey.net>",
+  "description": "Smashing Magazine monthly wallpaper scraper.",
+  "repository": {
+    "type": "git",
+    "url": "https://stevelacey@github.com/stevelacey/smash.js.git"
+  },
+  "keywords": [
+    "smash",
+    "smashing",
+    "mag",
+    "magazine"
+  ],
+  "dependencies" : {
+    "datejs": "*",
+    "jquery": "*",
+    "request": "*",
+    "url": "*",
+    "util": "*"
+  },
+  "license": "MIT"
+}

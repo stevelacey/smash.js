@@ -1,0 +1,6 @@
+[submodule "node_modules/request"]
+	path = node_modules/request
+	url = https://github.com/mikeal/request.git
+[submodule "node_modules/url"]
+	path = node_modules/url
+	url = https://github.com/isaacs/node-url.git
