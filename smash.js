@@ -9,7 +9,7 @@ var request = require('request'),
     http = require('http'),
     $ = require('jquery'),
 
-    directory = 'wallpaper'
+    directory = __dirname + '/' + 'wallpaper'
     old = directory + '/' + Date.parse('-month').toString('yyyy-MM'),
     path = directory + '/' + 'Current',
 
