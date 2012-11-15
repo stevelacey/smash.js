@@ -9,66 +9,102 @@ var request = require('request'),
     http = require('http'),
     $ = require('jquery'),
 
-    directory = __dirname + '/' + 'wallpaper'
+    domain = 'http://www.smashingmagazine.com',
+
+    slug = 'desktop-wallpaper-calendar-' + Date.today().toString('MMMM-yyyy').toLowerCase(),
+    slugs = [slug],
+
+    directory = __dirname + '/' + 'wallpaper',
     old = directory + '/' + Date.parse('-month').toString('yyyy-MM'),
     path = directory + '/' + 'Current',
 
     debug = true
+;
 
-var uri = 'http://www.smashingmagazine.com/desktop-wallpaper-calendar-' + Date.today().toString('MMMM-yyyy')
+// Seasonal
 
-if (debug) {
-  console.log('Requesting ' + uri);
+switch (parseInt(Date.today().toString('M'))) {
+  case 3:
+  case 4:
+    slugs[slugs.length] = slug + '-easter';
+    break;
+
+  case 10:
+    slugs[slugs.length] = slug + '-halloween';
+    break;
+
+  case 12:
+    slugs[slugs.length] = slug + '-christmas';
 }
 
-request({uri: uri}, function (error, r, html) {
-  if (!error && r.statusCode == 200) {
-    if (debug) {
-      console.log('Moving ' + path + ' to ' + old)
-    }
+// Go
 
-    fs.rename(path, old)
+for (var i = 0; i < slugs.length; i++) {
+  var slug = slugs[i];
 
-    if (debug) {
-      console.log('Creating ' + path)
-    }
+  var uri = domain + '/' + slug;
 
-    fs.mkdir(path)
+  if (slug.indexOf('wallpapers') === -1) {
+    slugs[slugs.length] = slug.replace('wallpaper', 'wallpapers');
+  }
 
-    if (debug) {
-      console.log('Scraping')
-    }
+  if (slug.indexOf('edition') === -1) {
+    slugs[slugs.length] = slug + '-edition';
+  }
 
-    $.extend($.expr[':'], {
-      'containsi': function(elem, i, match, array) {
-        return (elem.textContent || elem.innerText || '').toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
+  if (debug) {
+    console.log('Requesting ' + uri);
+  }
+
+  request({uri: uri}, function (error, r, html) {
+    if (!error && r.statusCode == 200) {
+      if (debug) {
+        console.log('Moving ' + path + ' to ' + old)
       }
-    });
 
-    $('.post ul:containsi("calendar"):has(li:containsi("with"))', html).each(function() {
-      var wallpaper = $('li:containsi("without calendar") a:last, li:containsi("with calendar") a:last', this).attr('href')
+      fs.rename(path, old)
 
       if (debug) {
-        console.log(wallpaper)
+        console.log('Creating ' + path)
       }
 
-      var filename = url.parse(wallpaper).pathname.split('/').pop();
-      var file = fs.createWriteStream(path + '/' + filename);
+      fs.mkdir(path)
 
-      var options = {
-        host: url.parse(wallpaper).host,
-        port: 80,
-        path: url.parse(wallpaper).pathname
+      if (debug) {
+        console.log('Scraping')
       }
 
-      http.get(options, function(res) {
-        res.on('data', function(data) {
-          file.write(data);
-        }).on('end', function() {
-          file.end();
-          console.log(filename + ' downloaded to ' + path);
+      $.extend($.expr[':'], {
+        'containsi': function(elem, i, match, array) {
+          return (elem.textContent || elem.innerText || '').toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
+        }
+      });
+
+      $('.post ul:containsi("calendar"):has(li:containsi("with"))', html).each(function() {
+        var wallpaper = $('li:containsi("without calendar") a:last, li:containsi("with calendar") a:last', this).attr('href')
+
+        if (debug) {
+          console.log(wallpaper)
+        }
+
+        var filename = url.parse(wallpaper).pathname.split('/').pop();
+        var file = fs.createWriteStream(path + '/' + filename);
+
+        var options = {
+          host: url.parse(wallpaper).host,
+          port: 80,
+          path: url.parse(wallpaper).pathname
+        }
+
+        http.get(options, function(res) {
+          res.on('data', function(data) {
+            file.write(data);
+          }).on('end', function() {
+            file.end();
+            console.log(filename + ' downloaded to ' + path);
+          })
         })
       })
-    })
-  }
-})
+    }
+  })
+}
