@@ -44,6 +44,10 @@ for (var i = 0; i < slugs.length; i++) {
 
   var uri = domain + '/' + slug;
 
+  if (slug.indexOf('calendars') === -1) {
+    slugs[slugs.length] = slug.replace('calendar', 'calendars');
+  }
+
   if (slug.indexOf('wallpapers') === -1) {
     slugs[slugs.length] = slug.replace('wallpaper', 'wallpapers');
   }
