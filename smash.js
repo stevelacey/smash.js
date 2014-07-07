@@ -85,7 +85,7 @@ for (var i = 0; i < slugs.length; i++) {
       });
 
       $('.post ul:containsi("calendar"):has(li:containsi("with"))', html).each(function() {
-        var wallpaper = $('li:containsi("without calendar") a:last, li:containsi("with calendar") a:last', this).attr('href')
+        var wallpaper = $('li:containsi("without calendar") a:not([href^="#"]):last, li:containsi("with calendar") a:not([href^="#"]):last', this).attr('href')
 
         if (debug) {
           console.log(wallpaper)
