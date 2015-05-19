@@ -60,7 +60,7 @@ for (var i = 0; i < slugs.length; i++) {
     console.log('Requesting ' + uri);
   }
 
-  request({uri: uri}, function (error, r, html) {
+  request({uri: uri, gzip: true}, function (error, r, html) {
     if (!error && r.statusCode == 200) {
       if (debug) {
         console.log('Moving ' + path + ' to ' + old)
